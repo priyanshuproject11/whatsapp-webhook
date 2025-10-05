@@ -12,8 +12,13 @@ export default async function handler(req, res) {
 
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
       console.log("Webhook verified");
-      return res.status(200).send(challenge);
+      return res
+        .status(200)
+        .setHeader("Content-Type", "text/plain")
+        .send(challenge);
     }
+
+    console.log("Webhook verification failed");
     return res.status(403).send("Verification failed");
   }
 
@@ -32,7 +37,7 @@ export default async function handler(req, res) {
     console.log(`Message from ${from}: ${text}`);
 
     await sendTextMessage(from, `Hello! You sent: "${text}"`);
-    return res.status(200).send("Message received");
+    return res.status(200).send("EVENT_RECEIVED");
   }
 
   return res.status(405).send("Method Not Allowed");
@@ -53,6 +58,7 @@ async function sendTextMessage(to, messageText) {
       },
       body: JSON.stringify(payload),
     });
+
     const data = await resp.json();
     if (!resp.ok) console.error("Send failed:", data);
     else console.log("Message sent:", data);
